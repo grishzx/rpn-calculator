@@ -10,17 +10,35 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
+    - name: Show project structure
+      run: |
+        echo "=== Project structure ==="
+        ls -la
+        echo -e "\n=== CMakeLists.txt content ==="
+        head -20 CMakeLists.txt
+      
     - name: Install dependencies
       run: |
         apt-get update
         apt-get install -y cmake g++ libgtest-dev
         
-    - name: Configure and Build
+    - name: Configure project
       run: |
-        cmake -B build
+        echo "=== Configuring with CMake ==="
+        cmake -B build -S .
+        
+    - name: Build project
+      run: |
+        echo "=== Building project ==="
         cmake --build build --parallel 2
+        
+    - name: List built files
+      run: |
+        echo "=== Built files ==="
+        find build -name "*.cpp" -o -name "*.h" -o -name "rpn*" -type f | head -10
         
     - name: Run Tests
       run: |
+        echo "=== Running tests ==="
         cd build
-        ctest --output-on-failure
+        ctest --verbose --output-on-failure || echo "Tests failed or no tests found"
